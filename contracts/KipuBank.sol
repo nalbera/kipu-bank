@@ -6,10 +6,13 @@ contract KipuBank {
     //Bóveda personal
     mapping (address => uint256) public ethBalances;
 
-    //Contadores
+    //Contadores por usuario
     mapping (address => uint256) public ethDepositCount;
     mapping (address => uint256) public ethWithdrawCount;
 
+    //Contadores generales
+    uint256 totalDeposits = 0;
+    uint256 totalWithdrawals = 0;
 
     //Limite de retiro por transacción
     uint256 public immutable WITHDRAWAL_LIMIT;
@@ -50,6 +53,8 @@ contract KipuBank {
 
         totalDeposit += msg.value;
 
+        totalDeposits++;
+
         emit DepositSuccessful(msg.sender, msg.value, ethBalances[msg.sender]);
     }
 
@@ -69,6 +74,8 @@ contract KipuBank {
         ethBalances[msg.sender] -= _amount;
 
         totalDeposit -= _amount;
+
+        totalWithdrawals++;
         
         (bool success,) = msg.sender.call{value: _amount}("");
 
@@ -111,7 +118,7 @@ contract KipuBank {
     * @dev Función auxiliar
     * @return Valor convertido
     */
-    function ethToWei(uint256 _ethAmount) public pure returns (uint256) {
+    function ethToWei(uint256 _ethAmount) private pure returns (uint256) {
         return _ethAmount * 10**18; //10 a la 18
     }
 
@@ -125,6 +132,24 @@ contract KipuBank {
             return 0;
         }
         return BANK_CAP - address(this).balance;
+    }
+
+    /**
+    * @notice Muestra la cantidad total de depósitos que se hicieron
+    * @dev Función auxiliar
+    * @return Retorna un número que representa la cantidad total de depósitos
+    */
+    function getCantTotalDeposit() public view returns (uint256){
+        return totalDeposits;
+    }
+
+    /**
+    * @notice Muestra la cantidad total de extracciones  que se hicieron
+    * @dev Función auxiliar
+    * @return Retorna un número que representa la cantidad total de extracciones
+    */
+    function getCantTotalWithdrawals() public view returns (uint256){
+        return totalWithdrawals;
     }
 
 }
